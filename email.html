@@ -1,1 +1,1467 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Extractor with AI Assistance</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover: #3a56d4;
+            --light-bg: #f8f9fa;
+            --success-color: #4cc9f0;
+            --success-bg: #e7f9fd;
+            --secondary-color: #7209b7;
+            --secondary-hover: #6008a0;
+            --text-color: #333;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .app-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 28px;
+            color: #333;
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+            font-size: 16px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .path-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .path-option {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            width: 300px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .path-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .path-option.active {
+            border-color: var(--primary-color);
+        }
+        
+        .path-icon {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        .path-option h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .path-option p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .step-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .step {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.2s;
+        }
+        
+        .step:hover {
+            transform: translateY(-5px);
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            background-color: var(--primary-color);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+        
+        .step-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .step-content {
+            margin-left: 50px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+        
+        .sample-text {
+            color: #666;
+            background-color: var(--light-bg);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        button.secondary {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        button.secondary:hover {
+            background-color: #dee2e6;
+        }
+        
+        button.success {
+            background-color: var(--success-color);
+        }
+        
+        button.success:hover {
+            background-color: #3ab7dc;
+        }
+        
+        button.magic {
+            background-color: var(--secondary-color);
+        }
+        
+        button.magic:hover {
+            background-color: var(--secondary-hover);
+        }
+        
+        button svg {
+            margin-right: 8px;
+        }
+        
+        .arrow-down {
+            width: 40px;
+            height: 40px;
+            margin: -15px auto;
+            position: relative;
+            z-index: 10;
+            color: var(--primary-color);
+        }
+        
+        .result-container {
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .result-table th {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: 600;
+        }
+        
+        .result-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .result-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .success-message {
+            background-color: var(--success-bg);
+            color: #0c7489;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            display: none;
+        }
+        
+        .success-message svg {
+            margin-right: 10px;
+        }
+        
+        .faded {
+            opacity: 0.6;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 5px;
+            color: #6c757d;
+            cursor: help;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .path-content {
+            display: none;
+        }
+        
+        .path-content.active {
+            display: block;
+        }
+        
+        .feature-badge {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        .ai-assistant {
+            background: linear-gradient(to right, #7209b7, #4361ee);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .ai-assistant-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .ai-assistant-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        
+        .output-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .loading-indicator {
+            display: none;
+            margin: 20px auto;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            display: inline-block;
+            animation: spin 1s ease infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            margin-top: 10px;
+            color: #666;
+        }
+        
+        #all-results-container {
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .step-content {
+                margin-left: 0;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="app-title">Contact Extractor</h1>
+        <p class="subtitle">Two ways to convert your contact list into a spreadsheet format. Choose the method that works best for you!</p>
+        
+        <!-- Path Selector -->
+        <div class="path-selector">
+            <div class="path-option active" data-path="self-service">
+                <div class="path-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <h3>Self-Service</h3>
+                <p>Paste your contact list and automatically convert it to a spreadsheet format</p>
+            </div>
+            
+            <div class="path-option" data-path="ai-extraction">
+                <div class="path-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#7209b7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a10 10 0 1 0 10 10H12V2z"></path>
+                        <path d="M12 2a10 10 0 1 1-10 10h10V2z"></path>
+                        <path d="M10 16l4-4"></path>
+                        <path d="M14 16l-4-4"></path>
+                    </svg>
+                </div>
+                <h3>AI Extraction <span class="feature-badge">New!</span></h3>
+                <p>Let AI find and extract contacts from your text automatically</p>
+            </div>
+        </div>
+        
+        <!-- Self-Service Path -->
+        <div class="path-content active" id="self-service-path">
+            <div class="step-container">
+                <!-- Step 1: Input -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Paste your contact list</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="sample-text">
+                            <strong>Your list can be in formats like:</strong><br>
+                            John Smith - john@example.com<br>
+                            Jane Doe: jane@example.com<br>
+                            1. Bob Jones - bob@example.com
+                        </div>
+                        <textarea id="input-text" placeholder="Paste your contact list here..."></textarea>
+                        <div class="button-group">
+                            <button id="load-sample">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                Load Example
+                            </button>
+                            <button id="clear-input" class="secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                                Clear All
+                            </button>
+                            <input type="file" id="file-input" class="file-input">
+                            <button id="upload-file" class="secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                Upload File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Arrow down -->
+                <div class="arrow-down">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="8 12 12 16 16 12"></polyline>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                    </svg>
+                </div>
+                
+                <!-- Step 2: Convert -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Convert your contacts</div>
+                    </div>
+                    <div class="step-content">
+                        <p>Click the button below to convert your contact list into a format for Google Sheets.</p>
+                        <div class="button-group">
+                            <button id="convert-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+                                    <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+                                    <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                    <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+                                    <path d="M21 12H3"></path>
+                                </svg>
+                                Convert Contact List
+                            </button>
+                        </div>
+                        
+                        <!-- Results Container -->
+                        <div id="result-container" class="result-container">
+                            <div id="success-message" class="success-message">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                Success! Your contact list has been converted.
+                            </div>
+                            
+                            <div id="preview-container">
+                                <h3>Preview</h3>
+                                <div class="result-table-wrapper">
+                                    <table class="result-table" id="preview-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Email</th>
+                                                <th>First Name</th>
+                                                <th>Last Name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="preview-body">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Arrow down -->
+                <div class="arrow-down">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="8 12 12 16 16 12"></polyline>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                    </svg>
+                </div>
+                
+                <!-- Step 3: Get Your Data -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Get your data</div>
+                    </div>
+                    <div class="step-content">
+                        <p>Choose how you'd like to get your data:</p>
+                        <div class="button-group">
+                            <button id="copy-csv" class="success">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                Copy to Clipboard
+                            </button>
+                            <button id="download-csv">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Download CSV
+                            </button>
+                        </div>
+                        <div class="sample-text">
+                            <strong>How to use in Google Sheets:</strong><br>
+                            1. Click "Copy to Clipboard" above<br>
+                            2. Open a new Google Sheet<br>
+                            3. Click the first cell (A1)<br>
+                            4. Paste (Ctrl+V or Cmd+V)<br>
+                            5. That's it! Your data is ready to use
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- AI Extraction Path -->
+        <div class="path-content" id="ai-extraction-path">
+            <div class="step-container">
+                <!-- AI Introduction -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Paste text containing contacts</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="ai-assistant">
+                            <div class="ai-assistant-header">
+                                <div class="ai-assistant-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <circle cx="12" cy="12" r="4"></circle>
+                                        <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+                                        <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+                                        <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
+                                        <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
+                                    </svg>
+                                </div>
+                                <h3>AI Contact Extractor</h3>
+                            </div>
+                            <p>Paste any text containing contact information below. The AI will automatically find and extract all emails and names, even from unstructured text or complex formats.</p>
+                        </div>
+                        
+                        <div class="sample-text">
+                            <strong>Can handle complex formats like:</strong><br>
+                            • Text with embedded contacts in different formats<br>
+                            • Contact information across multiple lines<br>
+                            • Web page content with contact information<br>
+                            • Any text with emails and associated names
+                        </div>
+                        
+                        <textarea id="ai-input-text" placeholder="Paste text containing contact information here..."></textarea>
+                        <div class="button-group">
+                            <button id="ai-extract-button" class="magic">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                                </svg>
+                                Extract Contacts with AI
+                            </button>
+                            <button id="ai-clear-input" class="secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                                Clear Input
+                            </button>
+                            <button id="ai-load-sample" class="secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                Load Example
+                            </button>
+                        </div>
+                        
+                        <!-- Loading Indicator -->
+                        <div id="loading-indicator" class="loading-indicator">
+                            <div class="spinner"></div>
+                            <div class="loading-text">AI is extracting contacts...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Arrow down -->
+                <div class="arrow-down">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="8 12 12 16 16 12"></polyline>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                    </svg>
+                </div>
+                
+                <!-- AI Results -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Review extracted contacts</div>
+                    </div>
+                    <div class="step-content">
+                        <div id="ai-result-container">
+                            <p>The extracted contacts will appear here after processing.</p>
+                        </div>
+                        
+                        <!-- All AI Results -->
+                        <div id="all-results-container" class="hidden">
+                            <h3>All Extracted Contacts</h3>
+                            <div class="result-table-wrapper">
+                                <table class="result-table" id="ai-results-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Email</th>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ai-results-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Arrow down -->
+                <div class="arrow-down">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="8 12 12 16 16 12"></polyline>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                    </svg>
+                </div>
+                
+                <!-- Export AI Results -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Get your data</div>
+                    </div>
+                    <div class="step-content">
+                        <p>Choose how you'd like to get your extracted contacts:</p>
+                        <div class="button-group">
+                            <button id="ai-copy-csv" class="success">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                Copy to Clipboard
+                            </button>
+                            <button id="ai-download-csv">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Download CSV
+                            </button>
+                        </div>
+                        <div class="sample-text">
+                            <strong>How to use in Google Sheets:</strong><br>
+                            1. Click "Copy to Clipboard" above<br>
+                            2. Open a new Google Sheet<br>
+                            3. Click the first cell (A1)<br>
+                            4. Paste (Ctrl+V or Cmd+V)<br>
+                            5. That's it! Your data is ready to use
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hidden textarea for CSV content -->
+        <textarea id="csv-content" class="hidden"></textarea>
+        <textarea id="ai-csv-content" class="hidden"></textarea>
+    </div>
+    
+    <script>
+        // Sample data
+        const SAMPLE_DATA = `1. Jamie Roller - jamie@drsquatch.com
+2. Irv Slobodskaya - irvin.slobodskaya@drsquatch.com
+3. Kendall Selverian - kendall.selverian@drsquatch.com
+4. Jeffrey Hawkins - jeffrey@drsquatch.com
+5. Molly Hainline - molly.hainline@drsquatch.com`;
+
+        const AI_SAMPLE_DATA = `Our marketing team consists of several key members:
+Jamie Roller (jamie@drsquatch.com) who leads our growth channels, 
+Irv Slobodskaya who can be reached at irvin.slobodskaya@drsquatch.com is our Director of Brand Marketing,
+and for lifecycle marketing, contact Molly Hainline at molly.hainline@drsquatch.com.
+
+Other team members include:
+- Kendall Selverian (kendall.selverian@drsquatch.com)
+- Jeffrey Hawkins (jeffrey@drsquatch.com) 
+- Katelynn Grajeda - katelynn.grajeda@drsquatch.com
+
+For questions about our eCommerce strategy, please email Kaiya Peralta (kaiya.peralta@drsquatch.com).`;
+
+        // DOM elements
+        const elements = {
+            // Path selector
+            pathOptions: document.querySelectorAll('.path-option'),
+            selfServicePath: document.getElementById('self-service-path'),
+            aiExtractionPath: document.getElementById('ai-extraction-path'),
+            
+            // Self-service path
+            inputText: document.getElementById('input-text'),
+            convertButton: document.getElementById('convert-button'),
+            resultContainer: document.getElementById('result-container'),
+            previewBody: document.getElementById('preview-body'),
+            successMessage: document.getElementById('success-message'),
+            csvContent: document.getElementById('csv-content'),
+            copyCsvButton: document.getElementById('copy-csv'),
+            downloadCsvButton: document.getElementById('download-csv'),
+            loadSampleButton: document.getElementById('load-sample'),
+            clearInputButton: document.getElementById('clear-input'),
+            uploadFileButton: document.getElementById('upload-file'),
+            fileInput: document.getElementById('file-input'),
+            
+            // AI extraction path
+            aiInputText: document.getElementById('ai-input-text'),
+            aiExtractButton: document.getElementById('ai-extract-button'),
+            aiResultContainer: document.getElementById('ai-result-container'),
+            aiLoadSampleButton: document.getElementById('ai-load-sample'),
+            aiClearInputButton: document.getElementById('ai-clear-input'),
+            loadingIndicator: document.getElementById('loading-indicator'),
+            allResultsContainer: document.getElementById('all-results-container'),
+            aiResultsBody: document.getElementById('ai-results-body'),
+            aiCsvContent: document.getElementById('ai-csv-content'),
+            aiCopyCsvButton: document.getElementById('ai-copy-csv'),
+            aiDownloadCsvButton: document.getElementById('ai-download-csv')
+        };
+        
+        // Parsed contacts
+        let parsedContacts = [];
+        let aiParsedContacts = [];
+        
+        // Path selector
+        elements.pathOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove active class from all options
+                elements.pathOptions.forEach(opt => opt.classList.remove('active'));
+                
+                // Add active class to clicked option
+                option.classList.add('active');
+                
+                // Show corresponding path content
+                const pathId = option.getAttribute('data-path');
+                document.querySelectorAll('.path-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                document.getElementById(`${pathId}-path`).classList.add('active');
+            });
+        });
+        
+        // Self-service path event listeners
+        elements.convertButton.addEventListener('click', convertContacts);
+        elements.copyCsvButton.addEventListener('click', copyToClipboard);
+        elements.downloadCsvButton.addEventListener('click', downloadCsv);
+        elements.loadSampleButton.addEventListener('click', loadSample);
+        elements.clearInputButton.addEventListener('click', clearInput);
+        elements.uploadFileButton.addEventListener('click', () => elements.fileInput.click());
+        elements.fileInput.addEventListener('change', handleFileUpload);
+        
+        // AI extraction path event listeners
+        elements.aiExtractButton.addEventListener('click', extractContactsWithAI);
+        elements.aiLoadSampleButton.addEventListener('click', loadAISample);
+        elements.aiClearInputButton.addEventListener('click', clearAIInput);
+        elements.aiCopyCsvButton.addEventListener('click', copyAIToClipboard);
+        elements.aiDownloadCsvButton.addEventListener('click', downloadAICsv);
+        
+        // Load sample data
+        function loadSample() {
+            elements.inputText.value = SAMPLE_DATA;
+        }
+        
+        // Load AI sample data
+        function loadAISample() {
+            elements.aiInputText.value = AI_SAMPLE_DATA;
+        }
+        
+        // Clear input
+        function clearInput() {
+            elements.inputText.value = '';
+            elements.resultContainer.style.display = 'none';
+        }
+        
+        // Clear AI input
+        function clearAIInput() {
+            elements.aiInputText.value = '';
+            elements.aiResultContainer.innerHTML = '<p>The extracted contacts will appear here after processing.</p>';
+            elements.allResultsContainer.classList.add('hidden');
+        }
+        
+        // Handle file upload
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    elements.inputText.value = event.target.result;
+                };
+                reader.readAsText(file);
+            }
+        }
+        
+        // Convert contacts (self-service path)
+        function convertContacts() {
+            const input = elements.inputText.value.trim();
+            if (!input) {
+                alert('Please paste your contact list first.');
+                return;
+            }
+            
+            parsedContacts = [];
+            const lines = input.split('\n').filter(line => line.trim() !== '');
+            
+            for (const line of lines) {
+                // Skip empty lines
+                if (!line.trim()) continue;
+                
+                // Remove numbering
+                const cleanLine = line.replace(/^\d+[\.\)]\s*/, '');
+                
+                // Try different separators to extract name and email
+                let namePart = '';
+                let emailPart = '';
+                let isValid = true;
+                
+                // Try different formats
+                if (cleanLine.includes(' - ')) {
+                    [namePart, emailPart] = cleanLine.split(' - ');
+                } else if (cleanLine.includes(' – ')) {
+                    [namePart, emailPart] = cleanLine.split(' – '); // en dash
+                } else if (cleanLine.includes(' — ')) {
+                    [namePart, emailPart] = cleanLine.split(' — '); // em dash
+                } else if (cleanLine.includes(':')) {
+                    [namePart, emailPart] = cleanLine.split(/:\s*/);
+                } else if (cleanLine.includes(',')) {
+                    [namePart, emailPart] = cleanLine.split(/,\s*/);
+                } else {
+                    // Try to find email pattern
+                    const emailMatch = cleanLine.match(/[\w.-]+@[\w.-]+\.\w+/);
+                    if (emailMatch) {
+                        emailPart = emailMatch[0];
+                        // The rest is the name
+                        namePart = cleanLine.replace(emailPart, '').trim();
+                        // Clean up any remaining separators
+                        namePart = namePart.replace(/^[:\-,\s]+|[:\-,\s]+$/g, '');
+                    } else {
+                        isValid = false;
+                    }
+                }
+                
+                // Trim whitespace
+                namePart = namePart.trim();
+                emailPart = emailPart.trim();
+                
+                // Skip if we couldn't parse properly
+                if (!namePart || !emailPart || !isValid) continue;
+                
+                // Split name into first and last
+                let firstName = '';
+                let lastName = '';
+                
+                const nameParts = namePart.split(/\s+/);
+                if (nameParts.length === 1) {
+                    firstName = nameParts[0];
+                    lastName = '';
+                } else {
+                    firstName = nameParts[0];
+                    lastName = nameParts.slice(1).join(' ');
+                }
+                
+                // Create contact object
+                const contact = {
+                    email: emailPart,
+                    firstName: firstName,
+                    lastName: lastName
+                };
+                
+                parsedContacts.push(contact);
+            }
+            
+            // Remove duplicates
+            const emailSet = new Set();
+            parsedContacts = parsedContacts.filter(contact => {
+                if (emailSet.has(contact.email)) {
+                    return false;
+                }
+                emailSet.add(contact.email);
+                return true;
+            });
+            
+            // Update preview table
+            updatePreviewTable();
+            
+            // Generate CSV content
+            generateCsvContent();
+            
+            // Show results
+            elements.resultContainer.style.display = 'block';
+            elements.successMessage.style.display = 'flex';
+            
+            // Scroll to results
+            elements.resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Update preview table (self-service path)
+        function updatePreviewTable() {
+            elements.previewBody.innerHTML = '';
+            
+            if (parsedContacts.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="3">No contacts found. Please check your input format.</td>';
+                elements.previewBody.appendChild(row);
+                return;
+            }
+            
+            // Show at most 5 contacts in preview
+            const maxPreview = Math.min(parsedContacts.length, 5);
+            
+            for (let i = 0; i < maxPreview; i++) {
+                const contact = parsedContacts[i];
+                const row = document.createElement('tr');
+                
+                const emailCell = document.createElement('td');
+                emailCell.textContent = contact.email;
+                
+                const firstNameCell = document.createElement('td');
+                firstNameCell.textContent = contact.firstName;
+                
+                const lastNameCell = document.createElement('td');
+                lastNameCell.textContent = contact.lastName;
+                
+                row.appendChild(emailCell);
+                row.appendChild(firstNameCell);
+                row.appendChild(lastNameCell);
+                
+                elements.previewBody.appendChild(row);
+            }
+            
+            // Add a row indicating there are more contacts if needed
+            if (parsedContacts.length > maxPreview) {
+                const row = document.createElement('tr');
+                row.classList.add('faded');
+                row.innerHTML = `<td colspan="3">(${parsedContacts.length - maxPreview} more contacts...)</td>`;
+                elements.previewBody.appendChild(row);
+            }
+        }
+        
+        // Generate CSV content (self-service path)
+        function generateCsvContent() {
+            let csvContent = 'Email,FirstName,LastName\n';
+            
+            parsedContacts.forEach(contact => {
+                csvContent += `${contact.email},${contact.firstName},${contact.lastName}\n`;
+            });
+            
+            elements.csvContent.value = csvContent;
+        }
+        
+        // Copy to clipboard (self-service path)
+        function copyToClipboard() {
+            if (parsedContacts.length === 0) {
+                alert('Please convert your contacts first.');
+                return;
+            }
+            
+            try {
+                // Generate CSV content directly
+                let csvContent = 'Email,FirstName,LastName\n';
+                
+                parsedContacts.forEach(contact => {
+                    csvContent += `${contact.email},${contact.firstName},${contact.lastName}\n`;
+                });
+                
+                // Try the modern clipboard API first
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(csvContent)
+                        .then(() => {
+                            // Show success message
+                            elements.copyCsvButton.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                                elements.copyCsvButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy to Clipboard';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            // Fall back to the old method
+                            elements.csvContent.value = csvContent;
+                            elements.csvContent.select();
+                            document.execCommand('copy');
+                            
+                            // Show success message
+                            elements.copyCsvButton.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                                elements.copyCsvButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy to Clipboard';
+                            }, 2000);
+                        });
+                } else {
+                    // Use the old method for browsers that don't support the Clipboard API
+                    elements.csvContent.value = csvContent;
+                    elements.csvContent.select();
+                    document.execCommand('copy');
+                    
+                    // Show success message
+                    elements.copyCsvButton.textContent = '✓ Copied!';
+                    setTimeout(() => {
+                        elements.copyCsvButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy to Clipboard';
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Copy error:', error);
+                alert('There was an error copying to clipboard. Please try the download option instead.');
+            }
+        }
+        
+        // Download CSV (self-service path)
+        function downloadCsv() {
+            if (parsedContacts.length === 0) {
+                alert('Please convert your contacts first.');
+                return;
+            }
+            
+            try {
+                // Generate CSV content
+                let csvContent = 'Email,FirstName,LastName\n';
+                
+                parsedContacts.forEach(contact => {
+                    csvContent += `${contact.email},${contact.firstName},${contact.lastName}\n`;
+                });
+                
+                // Create a simple text file download
+                const filename = 'contacts.csv';
+                
+                // Create a download link
+                const element = document.createElement('a');
+                element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+                element.setAttribute('download', filename);
+                element.style.display = 'none';
+                
+                // Add to DOM, click it, then remove it
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+                
+                // Show success message
+                elements.downloadCsvButton.textContent = '✓ Downloaded!';
+                setTimeout(() => {
+                    elements.downloadCsvButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download CSV';
+                }, 2000);
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('There was an error downloading the file. Please try copying to clipboard instead.');
+            }
+        }
+        
+        // Extract contacts with AI
+        function extractContactsWithAI() {
+            const input = elements.aiInputText.value.trim();
+            if (!input) {
+                alert('Please paste text containing contact information first.');
+                return;
+            }
+            
+            // Show loading indicator
+            elements.loadingIndicator.style.display = 'block';
+            
+            // Simulate AI processing (this would normally call an API)
+            setTimeout(() => {
+                // Here, we'll just use a simple regex-based extraction for demonstration
+                // In a real implementation, this would be replaced with an actual AI service call
+                aiParsedContacts = extractContactsFromText(input);
+                
+                // Hide loading indicator
+                elements.loadingIndicator.style.display = 'none';
+                
+                // Update the result container with a message
+                elements.aiResultContainer.innerHTML = `
+                    <div class="output-card">
+                        <h3>AI Extraction Complete</h3>
+                        <p>Successfully extracted ${aiParsedContacts.length} contacts from your text.</p>
+                    </div>
+                `;
+                
+                // Update the AI results table
+                updateAIResultsTable();
+                
+                // Generate AI CSV content
+                generateAICsvContent();
+                
+                // Show all results container
+                elements.allResultsContainer.classList.remove('hidden');
+                
+                // Scroll to results
+                elements.allResultsContainer.scrollIntoView({ behavior: 'smooth' });
+            }, 1500); // Simulated delay
+        }
+        
+        // Extract contacts from text using regex
+        function extractContactsFromText(text) {
+            // This is a simplified extraction - in a real implementation,
+            // this would be handled by an AI service
+            const contacts = [];
+            const emailRegex = /[\w.-]+@[\w.-]+\.\w+/g;
+            const lines = text.split('\n');
+            
+            // Extract emails from each line
+            for (const line of lines) {
+                const emails = line.match(emailRegex);
+                if (!emails) continue;
+                
+                for (const email of emails) {
+                    // Try to find a name associated with this email
+                    let namePart = '';
+                    
+                    // Look for patterns like "Name (email)" or "email (Name)"
+                    let nameMatch = line.match(new RegExp(`([\\w\\s]+)\\s*\\(\\s*${escapeRegExp(email)}\\s*\\)`, 'i'));
+                    if (nameMatch) {
+                        namePart = nameMatch[1].trim();
+                    } else {
+                        nameMatch = line.match(new RegExp(`${escapeRegExp(email)}\\s*\\(\\s*([\\w\\s]+)\\s*\\)`, 'i'));
+                        if (nameMatch) {
+                            namePart = nameMatch[1].trim();
+                        } else {
+                            // Look for patterns like "Name - email" or "Name: email"
+                            const emailIndex = line.indexOf(email);
+                            if (emailIndex > 0) {
+                                const beforeEmail = line.substring(0, emailIndex).trim();
+                                // Try to get the name part
+                                const separators = [' - ', ': ', ', ', ' at ', ' | '];
+                                for (const separator of separators) {
+                                    if (beforeEmail.includes(separator)) {
+                                        namePart = beforeEmail.split(separator).pop().trim();
+                                        break;
+                                    }
+                                }
+                                
+                                // If no separator found, try to find a name pattern before the email
+                                if (!namePart) {
+                                    const namePattern = /([A-Z][a-z]+ [A-Z][a-z]+)$/;
+                                    const nameMatch = beforeEmail.match(namePattern);
+                                    if (nameMatch) {
+                                        namePart = nameMatch[1].trim();
+                                    }
+                                }
+                            }
+                            
+                            // If still no name, look after the email
+                            if (!namePart && emailIndex >= 0 && emailIndex + email.length < line.length) {
+                                const afterEmail = line.substring(emailIndex + email.length).trim();
+                                if (afterEmail.startsWith('-') || afterEmail.startsWith(':')) {
+                                    namePart = afterEmail.substring(1).trim();
+                                }
+                            }
+                        }
+                    }
+                    
+                    // If no name found, try to look in surrounding lines
+                    if (!namePart) {
+                        const lineIndex = lines.indexOf(line);
+                        if (lineIndex > 0) {
+                            const prevLine = lines[lineIndex - 1].trim();
+                            if (prevLine && !prevLine.includes('@')) {
+                                namePart = prevLine;
+                            }
+                        }
+                        if (!namePart && lineIndex < lines.length - 1) {
+                            const nextLine = lines[lineIndex + 1].trim();
+                            if (nextLine && !nextLine.includes('@')) {
+                                namePart = nextLine;
+                            }
+                        }
+                    }
+                    
+                    // Clean up name part
+                    if (namePart) {
+                        // Remove leading indicators or numbers
+                        namePart = namePart.replace(/^[-•*>]+\s*/, '').replace(/^\d+\.\s*/, '');
+                    }
+                    
+                    // Split name into first and last
+                    let firstName = '';
+                    let lastName = '';
+                    
+                    if (namePart) {
+                        const nameParts = namePart.split(/\s+/);
+                        if (nameParts.length === 1) {
+                            firstName = nameParts[0];
+                            lastName = '';
+                        } else {
+                            firstName = nameParts[0];
+                            lastName = nameParts.slice(1).join(' ');
+                        }
+                    }
+                    
+                    // Create contact object
+                    const contact = {
+                        email: email,
+                        firstName: firstName,
+                        lastName: lastName
+                    };
+                    
+                    contacts.push(contact);
+                }
+            }
+            
+            // Remove duplicates
+            const uniqueContacts = [];
+            const emailSet = new Set();
+            
+            for (const contact of contacts) {
+                if (!emailSet.has(contact.email)) {
+                    emailSet.add(contact.email);
+                    uniqueContacts.push(contact);
+                }
+            }
+            
+            return uniqueContacts;
+        }
+        
+        // Update AI results table
+        function updateAIResultsTable() {
+            elements.aiResultsBody.innerHTML = '';
+            
+            if (aiParsedContacts.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="3">No contacts found in the text.</td>';
+                elements.aiResultsBody.appendChild(row);
+                return;
+            }
+            
+            for (const contact of aiParsedContacts) {
+                const row = document.createElement('tr');
+                
+                const emailCell = document.createElement('td');
+                emailCell.textContent = contact.email;
+                
+                const firstNameCell = document.createElement('td');
+                firstNameCell.textContent = contact.firstName;
+                
+                const lastNameCell = document.createElement('td');
+                lastNameCell.textContent = contact.lastName;
+                
+                row.appendChild(emailCell);
+                row.appendChild(firstNameCell);
+                row.appendChild(lastNameCell);
+                
+                elements.aiResultsBody.appendChild(row);
+            }
+        }
+        
+        // Generate AI CSV content
+        function generateAICsvContent() {
+            let csvContent = 'Email,FirstName,LastName\n';
+            
+            aiParsedContacts.forEach(contact => {
+                csvContent += `${contact.email},${contact.firstName},${contact.lastName}\n`;
+            });
+            
+            elements.aiCsvContent.value = csvContent;
+        }
+        
+        // Copy AI to clipboard
+        function copyAIToClipboard() {
+            if (aiParsedContacts.length === 0) {
+                alert('Please extract contacts first.');
+                return;
+            }
+            
+            try {
+                // Generate CSV content directly
+                let csvContent = 'Email,FirstName,LastName\n';
+                
+                aiParsedContacts.forEach(contact => {
+                    csvContent += `${contact.email},${contact.firstName},${contact.lastName}\n`;
+                });
+                
+                // Try the modern clipboard API first
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(csvContent)
+                        .then(() => {
+                            // Show success message
+                            elements.aiCopyCsvButton.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                                elements.aiCopyCsvButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy to Clipboard';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            // Fall back to the old method
+                            elements.aiCsvContent.value = csvContent;
+                            elements.aiCsvContent.select();
+                            document.execCommand('copy');
+                            
+                            // Show success message
+                            elements.aiCopyCsvButton.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                                elements.aiCopyCsvButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy to Clipboard';
+                            }, 2000);
+                        });
+                } else {
+                    // Use the old method for browsers that don't support the Clipboard API
+                    elements.aiCsvContent.value = csvContent;
+                    elements.aiCsvContent.select();
+                    document.execCommand('copy');
+                    
+                    // Show success message
+                    elements.aiCopyCsvButton.textContent = '✓ Copied!';
+                    setTimeout(() => {
+                        elements.aiCopyCsvButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy to Clipboard';
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Copy error:', error);
+                alert('There was an error copying to clipboard. Please try the download option instead.');
+            }
+        }
+        
+        // Download AI CSV
+        function downloadAICsv() {
+            if (aiParsedContacts.length === 0) {
+                alert('Please extract contacts first.');
+                return;
+            }
+            
+            try {
+                // Generate CSV content directly
+                let csvContent = 'Email,FirstName,LastName\n';
+                
+                aiParsedContacts.forEach(contact => {
+                    csvContent += `${contact.email},${contact.firstName},${contact.lastName}\n`;
+                });
+                
+                // Create a simple text file download
+                const filename = 'ai-extracted-contacts.csv';
+                
+                // Create a download link
+                const element = document.createElement('a');
+                element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+                element.setAttribute('download', filename);
+                element.style.display = 'none';
+                
+                // Add to DOM, click it, then remove it
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+                
+                // Show success message
+                elements.aiDownloadCsvButton.textContent = '✓ Downloaded!';
+                setTimeout(() => {
+                    elements.aiDownloadCsvButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download CSV';
+                }, 2000);
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('There was an error downloading the file. Please try copying to clipboard instead.');
+            }
+        }
+        
+        // Helper function to escape special characters in regex
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+    </script>
+</body>
+</html>
